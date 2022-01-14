@@ -81,4 +81,25 @@ class AutoRegister implements AutoRegisterContract
 
         return $this->queries;
     }
+
+    /**
+     * Scanning and registering classes in folder where given class is defined.
+     * 
+     * @param string $class.
+     * 
+     * @return Collection|null
+     */
+    public function scanWhere(string $class): ?Collection
+    {
+        if (!class_exists($class)):
+            return null;
+        endif;
+
+        $reflection = new ReflectionClass($class);
+        $namespace = $reflection->getNamespaceName();
+        $file_name = $reflection->getFileName();
+        $path = substr($file_name, 0, strrpos($file_name, "\\"));
+
+        return $this->scan($path, $namespace);
+    }
 }

@@ -15,4 +15,13 @@ interface AutoRegisterContract
      * @return Collection|null
      */
     public function scan(string $path, string $namespace): ?Collection;
+
+    /**
+     * Scanning and registering classes in folder where given class is defined.
+     * 
+     * @param string $class.
+     * 
+     * @return Collection|null
+     */
+    public function scanWhere(string $class): ?Collection;
 }
