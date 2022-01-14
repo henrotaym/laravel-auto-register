@@ -4,6 +4,7 @@ namespace Henrotaym\LaravelContainerAutoRegister\Services\AutoRegister;
 use ReflectionClass;
 use Illuminate\Support\Collection;
 use Henrotaym\LaravelHelpers\Facades\Helpers;
+use Henrotaym\LaravelContainerAutoRegister\Services\AutoRegister\Exceptions\FolderNotFound;
 use Henrotaym\LaravelContainerAutoRegister\Services\AutoRegister\Contracts\AutoRegisterContract;
 use Henrotaym\LaravelContainerAutoRegister\Services\AutoRegister\Contracts\ClassToRegisterContract;
 
@@ -66,11 +67,16 @@ class AutoRegister implements AutoRegisterContract
      * @param string $path Path to scan.
      * @param string $namespace Default namespace for path.
      * 
-     * @return Collection
+     * @return Collection|null
      */
-    public function scan(string $path, string $namespace): Collection
+    public function scan(string $path, string $namespace): ?Collection
     {
         $this->queries = collect();
+        if (!file_exists($path)):
+            report(FolderNotFound::path($path));
+            return null;
+        endif;
+
         $this->addFolder($path, $namespace);
 
         return $this->queries;

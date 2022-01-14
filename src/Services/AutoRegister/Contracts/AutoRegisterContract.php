@@ -12,7 +12,7 @@ interface AutoRegisterContract
      * @param string $path Path to scan.
      * @param string $namespace Default namespace for path.
      * 
-     * @return Collection
+     * @return Collection|null
      */
-    public function scan(string $path, string $namespace): Collection;
+    public function scan(string $path, string $namespace): ?Collection;
 }
