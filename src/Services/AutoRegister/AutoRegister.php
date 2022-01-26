@@ -98,7 +98,7 @@ class AutoRegister implements AutoRegisterContract
         $reflection = new ReflectionClass($class);
         $namespace = $reflection->getNamespaceName();
         $file_name = $reflection->getFileName();
-        $path = substr($file_name, 0, strrpos($file_name, "\\"));
+        $path = substr($file_name, 0, (strrpos($file_name, "\\") ?: strrpos($file_name, "/")));
 
         return $this->scan($path, $namespace);
     }
