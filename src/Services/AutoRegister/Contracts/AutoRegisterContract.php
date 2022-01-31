@@ -24,4 +24,13 @@ interface AutoRegisterContract
      * @return Collection|null
      */
     public function scanWhere(string $class): ?Collection;
+
+    /**
+     * Adding this class to those we should register.
+     * 
+     * @param string $class.
+     * 
+     * @return Collection|null
+     */
+    public function add(string $class): ?Collection;
 }

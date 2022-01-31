@@ -1,52 +1,28 @@
 <?php
 namespace Henrotaym\LaravelContainerAutoRegister\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Henrotaym\LaravelContainerAutoRegister\Facades\Package;
-use Henrotaym\LaravelContainerAutoRegister\Package as UnderlyingPackage;
+use Henrotaym\LaravelContainerAutoRegister\Package;
 use Henrotaym\LaravelContainerAutoRegister\Services\AutoRegister\AutoRegister;
 use Henrotaym\LaravelContainerAutoRegister\Services\AutoRegister\ClassToRegister;
 use Henrotaym\LaravelContainerAutoRegister\Services\AutoRegister\Contracts\AutoRegisterContract;
 use Henrotaym\LaravelContainerAutoRegister\Services\AutoRegister\Contracts\ClassToRegisterContract;
+use Henrotaym\LaravelPackageVersioning\Providers\Abstracts\VersionablePackageServiceProvider;
 
-class LaravelContainerAutoRegisterServiceProvider extends ServiceProvider
+class LaravelContainerAutoRegisterServiceProvider extends VersionablePackageServiceProvider
 {
-    /**
-     * Registering things to app.
-     * 
-     * @return void
-     */
-    public function register()
+    protected function addToRegister(): void
     {
-        $this->bindFacade()
-            ->registerConfig()
-            ->bindAutoRegisterService();
+        $this->bindAutoRegisterService();
     }
 
-    /**
-     * Binding facade.
-     * 
-     * @return self
-     */
-    protected function bindFacade(): self
+    protected function addToBoot(): void
     {
-        $this->app->bind(UnderlyingPackage::$prefix, function($app) {
-            return new UnderlyingPackage();
-        });
-
-        return $this;
+        //
     }
-    
-    /**
-     * Registering config
-     * 
-     * @return self
-     */
-    protected function registerConfig(): self
-    {
-        $this->mergeConfigFrom($this->getConfigPath(), Package::prefix());
 
-        return $this;
+    public static function getPackageClass(): string
+    {
+        return Package::class;
     }
 
     protected function bindAutoRegisterService()
@@ -55,41 +31,5 @@ class LaravelContainerAutoRegisterServiceProvider extends ServiceProvider
         $this->app->bind(AutoRegisterContract::class, AutoRegister::class);
 
         return $this;
-    }
-
-    /**
-     * Booting application.
-     * 
-     * @return void
-     */
-    public function boot()
-    {
-        $this->makeConfigPublishable();
-    }
-
-    /**
-     * Allowing config publication.
-     * 
-     * @return self
-     */
-    protected function makeConfigPublishable(): self
-    {
-        if ($this->app->runningInConsole()):
-            $this->publishes([
-              $this->getConfigPath() => config_path(Package::prefix() . '.php'),
-            ], 'config');
-        endif;
-
-        return $this;
-    }
-
-    /**
-     * Getting config path.
-     * 
-     * @return string
-     */
-    protected function getConfigPath(): string
-    {
-        return __DIR__.'/../config/config.php';
     }
 }

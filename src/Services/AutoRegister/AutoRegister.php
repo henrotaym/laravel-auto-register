@@ -12,6 +12,23 @@ use Henrotaym\LaravelContainerAutoRegister\Services\AutoRegister\Contracts\Class
 class AutoRegister implements AutoRegisterContract
 {
     /**
+     * Classes we're trying to register.
+     * 
+     * @var Collection
+     */
+    protected $classes;
+
+    /**
+     * Getting classes we're wokring on.
+     * 
+     * @return Collection
+     */
+    protected function getClasses(): Collection
+    {
+        return $this->classes ?? ($this->classes = collect());
+    }
+
+    /**
      * Adding given folder.
      * 
      * @param string $path
@@ -52,13 +69,10 @@ class AutoRegister implements AutoRegisterContract
         // Removing file extension for classname.
         $class = substr($file_namespace, 0, strrpos($file_namespace, '.'));
 
-        $query = app()->make(ClassToRegisterContract::class)
-            ->setNameWithExtension($file)
+        $class_to_register = app()->make(ClassToRegisterContract::class)
             ->setClass($class);
 
-        $query->register();
-        
-        $this->queries->push($query);
+        return $this->registerClass($class_to_register);
     }
 
     /**
@@ -71,7 +85,6 @@ class AutoRegister implements AutoRegisterContract
      */
     public function scan(string $path, string $namespace): ?Collection
     {
-        $this->queries = collect();
         if (!file_exists($path)):
             report(FolderNotFound::path($path));
             return null;
@@ -79,7 +92,7 @@ class AutoRegister implements AutoRegisterContract
 
         $this->addFolder($path, $namespace);
 
-        return $this->queries;
+        return $this->getClasses();
     }
 
     /**
@@ -101,5 +114,39 @@ class AutoRegister implements AutoRegisterContract
         $path = substr($file_name, 0, (strrpos($file_name, "\\") ?: strrpos($file_name, "/")));
 
         return $this->scan($path, $namespace);
+    }
+
+    /**
+     * Adding this class to those we should register.
+     * 
+     * @param string $class.
+     * 
+     * @return Collection|null
+     */
+    public function add(string $class): ?Collection
+    {
+        if (!class_exists($class)):
+            return null;
+        endif;
+
+        $class_to_register = app()->make(ClassToRegisterContract::class)
+            ->setClass($class);
+
+        return $this->registerClass($class_to_register);
+    }
+
+    /**
+     * Registering class if possible and adding it to registered one if sucessfull.
+     * 
+     * @param ClassToRegisterContract $class_to_register
+     * @return Collection Classes successfully registered till now.
+     */
+    protected function registerClass(ClassToRegisterContract $class_to_register): Collection
+    {
+        if ($class_to_register->register()):
+            $this->getClasses()->push($class_to_register);
+        endif;
+
+        return $this->getClasses();
     }
 }

@@ -1,6 +1,7 @@
 <?php
 namespace Henrotaym\LaravelContainerAutoRegister\Services\AutoRegister;
 
+use ReflectionClass;
 use Illuminate\Support\Collection;
 use Henrotaym\LaravelHelpers\Facades\Helpers;
 use Henrotaym\LaravelContainerAutoRegister\Services\AutoRegister\Contracts\AutoRegistrableContract;
@@ -10,11 +11,11 @@ use Henrotaym\LaravelContainerAutoRegister\Services\AutoRegister\Contracts\Class
 class ClassToRegister implements ClassToRegisterContract
 {
     /**
-     * Query name.
+     * Reflection of given class.
      * 
-     * @var string
+     * @var ReflectionClass|null
      */
-    protected $name;
+    protected $reflected;
 
     /**
      * Query class.
@@ -35,30 +36,6 @@ class ClassToRegister implements ClassToRegisterContract
     protected $interfaces;
 
     /**
-     * Setting file name.
-     *  
-     * @param string $name
-     * @return ClassToRegisterContract
-     */
-    public function setName(string $name): ClassToRegisterContract
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    /**
-     * Setting file name from file with extension.
-     *  
-     * @param string $name
-     * @return ClassToRegisterContract
-     */
-    public function setNameWithExtension(string $name): ClassToRegisterContract
-    {
-        return $this->setName(substr($name, 0, strpos($name, '.')));
-    }
-
-    /**
      * Setting class name.
      *  
      * @param string $class
@@ -68,16 +45,22 @@ class ClassToRegister implements ClassToRegisterContract
     {
         $this->class = $class;
         
-        return $this->setInterfaces();
+        return $this->setReflected()
+            ->setInterfaces();
+    }
+
+    protected function setReflected(): self
+    {
+        $this->reflected = class_exists($this->class)
+            ? new ReflectionClass($this->class)
+            : null;
+
+        return $this;
     }
 
     protected function setInterfaces(): self
     {
-        $interfaces = class_exists($this->class)
-            ? class_implements($this->class)
-            : null;
-
-        $this->interfaces = collect($interfaces)->values();
+        $this->interfaces = collect(optional($this->reflected)->getInterfaceNames());
 
         return $this->setRegistrableInterface();
     }
@@ -91,7 +74,7 @@ class ClassToRegister implements ClassToRegisterContract
         endif;
 
         $this->registrable_interface = $this->interfaces->first(function(string $interface) {
-            return Helpers::str_contains($interface, $this->name . "Contract");
+            return Helpers::str_contains($interface, $this->reflected->getShortName() . "Contract");
         });
 
         return $this;

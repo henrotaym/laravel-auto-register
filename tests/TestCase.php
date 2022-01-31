@@ -1,26 +1,26 @@
 <?php
 namespace Henrotaym\LaravelContainerAutoRegister\Tests;
 
-use Henrotaym\LaravelTestSuite\TestSuite;
-use Orchestra\Testbench\TestCase as BaseTestCase;
-use Henrotaym\LaravelHelpers\Providers\HelperServiceProvider;
+use Henrotaym\LaravelContainerAutoRegister\Package;
+use Henrotaym\LaravelPackageVersioning\Testing\VersionablePackageTestCase;
 use Henrotaym\LaravelContainerAutoRegister\Providers\LaravelContainerAutoRegisterServiceProvider;
 
-class TestCase extends BaseTestCase
+class TestCase extends VersionablePackageTestCase
 {
-    use TestSuite;
+    public static function getPackageClass(): string
+    {
+        return Package::class;
+    }
     
     /**
      * Providers used bu application (manual registration is compulsory)
      * 
-     * @param Application $app
      * @return array
      */
-    protected function getPackageProviders($app)
+    public function getServiceProviders(): array
     {
         return [
             LaravelContainerAutoRegisterServiceProvider::class,
-            HelperServiceProvider::class
         ];
     }
 }

@@ -7,22 +7,6 @@ namespace Henrotaym\LaravelContainerAutoRegister\Services\AutoRegister\Contracts
 interface ClassToRegisterContract
 {
     /**
-     * Setting file name.
-     *  
-     * @param string $name
-     * @return ClassToRegisterContract
-     */
-    public function setName(string $name): ClassToRegisterContract;
-
-    /**
-     * Setting file name from file with extension.
-     *  
-     * @param string $name
-     * @return ClassToRegisterContract
-     */
-    public function setNameWithExtension(string $name): ClassToRegisterContract;
-
-    /**
      * Setting class name.
      *  
      * @param string $class
