@@ -73,8 +73,10 @@ class ClassToRegister implements ClassToRegisterContract
             return $this;
         endif;
 
-        $this->registrable_interface = $this->interfaces->first(function(string $interface) {
-            return Helpers::str_contains($interface, $this->reflected->getShortName() . "Contract");
+        $expected_interface = $this->reflected->getShortName() . "Contract";
+
+        $this->registrable_interface = $this->interfaces->first(function(string $interface) use ($expected_interface) {
+            return $expected_interface === (new ReflectionClass($interface))->getShortName();
         });
 
         return $this;
